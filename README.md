@@ -120,6 +120,29 @@ nb run
 |---|---|
 | `附近机厅` / `查机厅` / `附近舞萌` / `机厅推荐` / `找机厅` | 回复定位网页，返回附近机厅推荐 |
 
+## 本地测试（无需 QQ）
+
+不需要 QQ 账号也能把完整流程跑一遍：
+
+```bash
+# 1) 首次：创建虚拟环境并安装依赖
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install "nonebot2[fastapi]" nonebot-adapter-onebot httpx
+
+# 2) 一键自动化测试（11 项断言：路由/结果页/指令/美团抖音脚本）
+.venv\Scripts\python.exe -X utf8 test_full.py
+
+# 3) 核心逻辑 + 真实机厅数据冒烟（不依赖 NoneBot）
+python -X utf8 test_core.py
+
+# 4) 本地演示服务器：浏览器里体验完整流程（定位 -> 推荐结果页）
+.venv\Scripts\python.exe demo.py
+```
+
+第 4 步启动后，用浏览器打开它打印出的
+`http://127.0.0.1:18080/arcade/locate?token=...` 链接并允许定位，即可看到结果页；
+也可用打印出的 curl 命令以固定坐标直接测结果接口（按 Ctrl+C 停止）。
+
 ## 配置项一览
 
 见 `.env.example`。关键项：
