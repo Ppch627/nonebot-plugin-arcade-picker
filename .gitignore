@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.venv/
+.venv-test/
+deal_coin_prices.json
+.env
+.env.*
+!.env.example
