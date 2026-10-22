@@ -64,7 +64,6 @@ def _render_page(title: str, body: str) -> str:
         ".row{display:flex;flex-wrap:wrap;gap:6px 14px;margin:4px 0;font-size:14px;color:#52606d}"
         ".tag{background:#eef2f7;border-radius:6px;padding:2px 8px;font-size:12px;color:#52606d}"
         ".badge{font-weight:600}.open{color:#0b8f23}.closed{color:#c0392b}"
-        ".score{font-size:26px;font-weight:700;color:#0b6bcb}"
         "a{color:#0b6bcb;text-decoration:none}button{background:#0b6bcb;color:#fff;border:0;"
         "border-radius:8px;padding:10px 18px;font-size:15px;cursor:pointer}"
         "input{border:1px solid #cbd2d9;border-radius:8px;padding:9px 10px;font-size:14px;margin:4px 0;width:200px}"
@@ -140,15 +139,9 @@ def render_results(cands: List[Candidate], lat: float, lng: float) -> str:
             "<div class='card'>附近没有收录到舞萌DX机厅，试试扩大搜索范围或换一个位置。</div>",
         )
 
-    wd = plugin_config.arcade_weight_distance
-    wc = plugin_config.arcade_weight_count
-    wp = plugin_config.arcade_weight_price
     parts: List[str] = []
     parts.append(
-        "<div class='note'>"
-        f"综合评分 = 100 × ({wd:.2f}×距离分 + {wc:.2f}×机台数分 + {wp:.2f}×价格分)，"
-        "距离/价格越低、机台越多分越高，已打烊机厅折半。"
-        "</div>"
+        "<div class='note'>按距离、舞萌DX机台数、单局价格综合排序，越靠前越推荐。</div>"
     )
     medals = ["🥇", "🥈", "🥉"]
     for c in cands:
@@ -177,10 +170,7 @@ def render_results(cands: List[Candidate], lat: float, lng: float) -> str:
         map_link = f"<a href='{html.escape(amap)}' target='_blank'>地图导航</a>"
         parts.append(
             "<div class='card'>"
-            f"<div style='display:flex;justify-content:space-between;align-items:center'>"
             f"<h2 style='margin:0'>{medal} {html.escape(c.name)}</h2>"
-            f"<div class='score'>{c.score}</div>"
-            "</div>"
             f"<div class='row'>{' '.join(rows)}</div>"
             f"<div class='row muted'>📍 {html.escape(c.address)}</div>"
             f"<div class='row'>{link}　{map_link}</div>"
@@ -203,7 +193,7 @@ async def push_to_qq(item: Dict[str, Any], cands: List[Candidate]) -> None:
     if not cands:
         msg = "附近没有收录到舞萌DX机厅，试试换一个位置。"
     else:
-        lines = ["🎮 附近舞萌DX机厅推荐（按综合评分排序）：", ""]
+        lines = ["🎮 附近舞萌DX机厅推荐：", ""]
         for c in cands[:5]:
             if c.coins_per_play is not None and c.cost_per_play is not None:
                 price_str = f"{c.coins_per_play}币 × {c.coin_price:.2f}元/币({price_source_label(c.coin_price_source)}) ≈ {c.cost_per_play:.2f}元"
@@ -211,7 +201,7 @@ async def push_to_qq(item: Dict[str, Any], cands: List[Candidate]) -> None:
                 price_str = "币数未知"
             status = "🟢营业中" if c.is_open else "🔴已打烊"
             line = f"{c.order}. {c.name}  [{status}]\n"
-            line += f"   距离 {c.distance_km:.2f}km｜舞萌DX {c.quantity}台｜{price_str}｜评分 {c.score}"
+            line += f"   距离 {c.distance_km:.2f}km｜舞萌DX {c.quantity}台｜{price_str}"
             if c.metro:
                 line += f"｜最近地铁 {c.metro}"
             lines.append(line)
